@@ -1,0 +1,31 @@
+# ==========================================
+# AI Interview System - Python Dependencies
+# ==========================================
+# Web Framework & Authentication
+Flask>=3.0.0
+Flask-SQLAlchemy>=3.1.0
+Flask-Login>=0.6.3
+Werkzeug>=3.0.0
+reportlab>=4.0.0
+itsdangerous>=2.2.0
+# Database (MongoDB Object-Document Mapper)
+mongoengine>=0.29.0
+pymongo>=4.9.0
+# Database Fallback (SQLite)
+Flask-SQLAlchemy>=3.1.0
+# AI Evaluation Engines
+google-generativeai>=0.8.0
+openai>=1.50.0
+# AI Proctoring & Computer Vision
+opencv-python>=4.10.0
+numpy>=1.26.0
+# PDF Report Generation
+reportlab>=4.2.0
+# Transactional Email & Password Reset
+yagmail>=0.16.0
+premailer>=3.10.0
+# Environment Configuration & HTTP
+python-dotenv>=1.0.0
+requests>=2.31.0
+# Automated Testing
+pytest>=8.0.0

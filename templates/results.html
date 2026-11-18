@@ -1,0 +1,522 @@
+{% extends "base.html" %}
+
+{% block title %}Interview Assessment Report #{{ interview.id }} - AI Interview System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-11 col-xl-10">
+
+      <!-- TOP ACTION BAR -->
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 pb-3 border-bottom">
+        <div>
+          <span class="badge bg-success-subtle text-success border border-success-subtle mb-1">
+            <i class="bi bi-check-circle-fill me-1"></i> Assessment Completed
+          </span>
+          <h2 class="fw-bold mb-0">Interview Performance Report</h2>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="{{ url_for('interview.download_pdf', interview_id=interview.id) }}" class="btn btn-primary-gradient">
+            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Download PDF Report
+          </a>
+          <a href="{{ url_for('interview.setup') }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-repeat me-1"></i> Retake / New Session
+          </a>
+          <a href="{{ url_for('candidate.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-house me-1"></i> Dashboard
+          </a>
+        </div>
+      </div>
+
+      <!-- CANDIDATE & SESSION METADATA CARD -->
+      <div class="custom-card mb-4 bg-light border-0 shadow-sm">
+        <div class="custom-card-body p-4">
+          <div class="row g-3 align-items-center">
+            <div class="col-md-3">
+              <span class="text-muted small text-uppercase fw-semibold d-block">Candidate</span>
+              <strong class="fs-6 text-dark">{{ interview.candidate.name }}</strong>
+              <small class="text-muted d-block">{{ interview.candidate.email }}</small>
+            </div>
+            <div class="col-md-3">
+              <span class="text-muted small text-uppercase fw-semibold d-block">Category & Topic</span>
+              <strong class="fs-6 text-dark">{{ interview.category }}</strong>
+              {% if interview.topic %}
+                <span class="badge bg-secondary-subtle text-secondary small d-inline-block">{{ interview.topic }}</span>
+              {% endif %}
+            </div>
+            <div class="col-md-3">
+              <span class="text-muted small text-uppercase fw-semibold d-block">Difficulty & Mode</span>
+              <span class="badge badge-custom badge-{{ interview.difficulty|lower }}">{{ interview.difficulty }}</span>
+              <span class="badge bg-light text-dark border small ms-1">{{ interview.input_mode|capitalize }} Mode</span>
+            </div>
+            <div class="col-md-3">
+              <span class="text-muted small text-uppercase fw-semibold d-block">Evaluation Engine</span>
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle small text-wrap">
+                <i class="bi bi-robot me-1"></i> {{ interview.evaluation_mode }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if interview.resume_filename %}
+      <div class="alert alert-info border-0 rounded-3 shadow-sm mb-4 d-flex align-items-center gap-3">
+        <i class="bi bi-file-earmark-person-fill fs-3 text-primary"></i>
+        <div>
+          <span class="badge bg-primary mb-1">Personalised Resume Interview</span>
+          <div>Questions for this interview were generated directly from your uploaded resume: <strong>{{ interview.resume_filename }}</strong>.</div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- OVERALL SCORECARD HERO -->
+      <div class="row g-3 mb-4">
+        <!-- Main Percentage Card with Proctoring Reduction -->
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm text-center p-4 text-white" 
+               style="background: linear-gradient(135deg, var(--primary), var(--primary-dark));">
+            <p class="text-white-50 text-uppercase fw-bold small mb-1">Final Net Score</p>
+            <h1 class="display-3 fw-extrabold mb-0">
+              {{ result.percentage if result else (interview.total_score * 10)|round(1) }}%
+            </h1>
+            <p class="mb-2 fs-5 fw-semibold">
+              {{ result.total_score if result else interview.total_score|round(1) }} / 10 Points
+            </p>
+
+            <!-- Raw score vs Proctoring Deduction badge -->
+            {% if interview.tab_switch_count > 0 or interview.proctoring_penalty > 0 %}
+              <div class="p-2 mb-2 bg-dark bg-opacity-50 rounded small text-start">
+                <div class="d-flex justify-content-between text-white-50">
+                  <span>Raw AI Score:</span>
+                  <strong>{{ interview.raw_score|round(1) }}/10 ({{ (interview.raw_score * 10)|round(0)|int }}%)</strong>
+                </div>
+                <div class="d-flex justify-content-between text-warning">
+                  <span>Tab Deductions:</span>
+                  <strong>-{{ (interview.proctoring_penalty * 10)|round(0)|int }}%</strong>
+                </div>
+                <div class="d-flex justify-content-between text-info">
+                  <span>Tab Switches:</span>
+                  <strong>{{ interview.tab_switch_count }}</strong>
+                </div>
+              </div>
+            {% endif %}
+
+            <div>
+              {% set pct = result.percentage if result else (interview.total_score * 10) %}
+              {% if pct >= 80 %}
+                <span class="badge bg-success px-3 py-2 rounded-pill"><i class="bi bi-star-fill me-1"></i> Excellent / Interview Ready</span>
+              {% elif pct >= 65 %}
+                <span class="badge bg-info text-dark px-3 py-2 rounded-pill"><i class="bi bi-check2-circle me-1"></i> Competent / Solid Knowledge</span>
+              {% else %}
+                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill"><i class="bi bi-exclamation-triangle me-1"></i> Needs Targeted Practice</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Rubric Breakdown Cards -->
+        <div class="col-md-8">
+          <div class="custom-card h-100 mb-0">
+            <div class="custom-card-header">
+              <h5 class="mb-0 fw-bold"><i class="bi bi-ui-checks me-2 text-primary"></i> 4-Part Evaluation Rubric Breakdown</h5>
+            </div>
+            <div class="custom-card-body">
+              <div class="row g-3">
+                <div class="col-sm-6">
+                  <div class="p-3 rounded-3 bg-light border">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <span class="fw-semibold small">Technical Correctness (40%)</span>
+                      <strong class="text-primary">{{ result.correctness_avg if result else 0 }}/10</strong>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                      <div class="progress-bar bg-primary" style="width: {{ (result.correctness_avg * 10) if result else 0 }}%"></div>
+                    </div>
+                    <small class="text-muted d-block mt-1">Accuracy of definitions, syntax, and principles.</small>
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="p-3 rounded-3 bg-light border">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <span class="fw-semibold small">Relevance to Prompt (25%)</span>
+                      <strong class="text-info">{{ result.relevance_avg if result else 0 }}/10</strong>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                      <div class="progress-bar bg-info" style="width: {{ (result.relevance_avg * 10) if result else 0 }}%"></div>
+                    </div>
+                    <small class="text-muted d-block mt-1">Directness addressing core question aspects.</small>
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="p-3 rounded-3 bg-light border">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <span class="fw-semibold small">Completeness & Depth (20%)</span>
+                      <strong class="text-success">{{ result.completeness_avg if result else 0 }}/10</strong>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                      <div class="progress-bar bg-success" style="width: {{ (result.completeness_avg * 10) if result else 0 }}%"></div>
+                    </div>
+                    <small class="text-muted d-block mt-1">Coverage of sub-points and edge conditions.</small>
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="p-3 rounded-3 bg-light border">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <span class="fw-semibold small">Clarity & Communication (15%)</span>
+                      <strong class="text-warning">{{ result.clarity_avg if result else 0 }}/10</strong>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                      <div class="progress-bar bg-warning" style="width: {{ (result.clarity_avg * 10) if result else 0 }}%"></div>
+                    </div>
+                    <small class="text-muted d-block mt-1">Structured thoughts and logical progression.</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROCTORING & INTEGRITY AUDIT SECTION -->
+      <div class="custom-card mb-4 border-0 shadow-sm overflow-hidden">
+        <div class="custom-card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold">
+            <i class="bi bi-shield-shaded text-warning me-2"></i> AI Proctoring & Assessment Integrity Report
+          </h5>
+          <span class="badge {% if interview.integrity_score >= 85 %}bg-success{% elif interview.integrity_score >= 70 %}bg-warning text-dark{% else %}bg-danger{% endif %} fs-6 px-3 py-1">
+            Integrity Rating: {{ interview.integrity_score|round(0)|int }}%
+          </span>
+        </div>
+        <div class="custom-card-body p-4 bg-light">
+          <!-- Summary Cards -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-3 col-6">
+              <div class="p-3 bg-white rounded-3 border text-center">
+                <span class="text-muted small text-uppercase d-block">Tab Switches</span>
+                <strong class="fs-4 {% if interview.tab_switch_count > 0 %}text-danger{% else %}text-success{% endif %}">
+                  {{ interview.tab_switch_count }}
+                </strong>
+                <small class="text-muted d-block mt-1">(-{{ (interview.tab_switch_count * 5) }}% mark penalty)</small>
+              </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+              <div class="p-3 bg-white rounded-3 border text-center">
+                <span class="text-muted small text-uppercase d-block">Frame Violations</span>
+                <strong class="fs-4 {% if interview.violations_count > 0 %}text-danger{% else %}text-success{% endif %}">
+                  {{ interview.violations_count }}
+                </strong>
+                <small class="text-muted d-block mt-1">Multiple persons / objects</small>
+              </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+              <div class="p-3 bg-white rounded-3 border text-center">
+                <span class="text-muted small text-uppercase d-block">Raw AI Score</span>
+                <strong class="fs-4 text-primary">
+                  {{ interview.raw_score|round(1) }}/10
+                </strong>
+                <small class="text-muted d-block mt-1">({{ (interview.raw_score * 10)|round(0)|int }}% before penalty)</small>
+              </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+              <div class="p-3 bg-white rounded-3 border text-center">
+                <span class="text-muted small text-uppercase d-block">Total Deduction</span>
+                <strong class="fs-4 text-warning">
+                  -{{ (interview.proctoring_penalty * 10)|round(0)|int }}%
+                </strong>
+                <small class="text-muted d-block mt-1">(-{{ interview.proctoring_penalty|round(1) }} pts)</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Proctoring Logs Timeline -->
+          <h6 class="fw-bold text-dark mb-2">
+            <i class="bi bi-clock-history me-1 text-secondary"></i> Monitored Integrity Events:
+          </h6>
+          {% if proctoring_logs %}
+            <div class="table-responsive bg-white rounded border">
+              <table class="table table-sm table-hover align-middle mb-0 small">
+                <thead class="table-light">
+                  <tr>
+                    <th class="ps-3">Time</th>
+                    <th>Event Type</th>
+                    <th>Severity</th>
+                    <th>Description</th>
+                    <th class="text-end pe-3">Penalty</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for log in proctoring_logs %}
+                    <tr>
+                      <td class="ps-3 text-muted">{{ log.timestamp.strftime('%H:%M:%S') if log.timestamp else 'N/A' }}</td>
+                      <td>
+                        <span class="badge {% if log.event_type == 'tab_switch' %}bg-danger{% elif log.event_type == 'multiple_faces' %}bg-danger{% elif log.event_type == 'prohibited_object' %}bg-warning text-dark{% else %}bg-secondary{% endif %} text-uppercase">
+                          {{ log.event_type|replace('_', ' ') }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge bg-light text-dark border">{{ log.severity|capitalize }}</span>
+                      </td>
+                      <td>{{ log.description }}</td>
+                      <td class="text-end pe-3 text-danger fw-bold">
+                        {% if log.penalty_applied > 0 %}-{{ (log.penalty_applied * 10)|round(0)|int }}%{% else %}&mdash;{% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="p-3 bg-white rounded border text-center text-success small">
+              <i class="bi bi-shield-check fs-4 d-block mb-1"></i>
+              <strong>Clean Session Record:</strong> Zero tab switches or frame violations were detected.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- VISUAL ANALYTICS: RADAR & PROGRESSION CHARTS -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <div class="custom-card h-100">
+            <div class="custom-card-header">
+              <h5 class="mb-0 fw-bold"><i class="bi bi-radar me-2 text-primary"></i> Rubric Competency Radar</h5>
+            </div>
+            <div class="custom-card-body d-flex justify-content-center align-items-center" style="min-height: 280px;">
+              <canvas id="rubricRadarChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="custom-card h-100">
+            <div class="custom-card-header">
+              <h5 class="mb-0 fw-bold"><i class="bi bi-bar-chart-line me-2 text-info"></i> Question-by-Question Progression</h5>
+            </div>
+            <div class="custom-card-body" style="min-height: 280px;">
+              <canvas id="progressionBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STRENGTHS & RECOMMENDATIONS -->
+      {% if result %}
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <div class="custom-card h-100 border-success">
+            <div class="custom-card-header bg-success-subtle">
+              <h5 class="mb-0 fw-bold text-success"><i class="bi bi-hand-thumbs-up-fill me-2"></i> Demonstrated Strengths</h5>
+            </div>
+            <div class="custom-card-body">
+              {% if result.strengths %}
+                <ul class="list-group list-group-flush">
+                  {% for s in result.strengths %}
+                    <li class="list-group-item px-0 py-2 d-flex align-items-start gap-2 border-0">
+                      <i class="bi bi-check-circle-fill text-success fs-6 mt-1"></i>
+                      <span>{{ s }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="text-muted small mb-0">No specific strengths captured.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="custom-card h-100 border-primary">
+            <div class="custom-card-header bg-primary-subtle">
+              <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-lightbulb-fill me-2"></i> Tailored Actionable Advice</h5>
+            </div>
+            <div class="custom-card-body">
+              {% if result.recommendations %}
+                <ul class="list-group list-group-flush">
+                  {% for rec in result.recommendations %}
+                    <li class="list-group-item px-0 py-2 d-flex align-items-start gap-2 border-0">
+                      <i class="bi bi-arrow-right-circle-fill text-primary fs-6 mt-1"></i>
+                      <span>{{ rec }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="text-muted small mb-0">No recommendations captured.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- DETAILED QUESTION-BY-QUESTION BREAKDOWN -->
+      <div class="custom-card">
+        <div class="custom-card-header">
+          <h5 class="mb-0 fw-bold"><i class="bi bi-list-check me-2 text-primary"></i> Detailed Question-Wise Evaluation</h5>
+        </div>
+        <div class="custom-card-body p-0">
+          <div class="accordion accordion-flush" id="questionsAccordion">
+            {% for resp in responses %}
+              {% set q = resp.question %}
+              <div class="accordion-item border-bottom">
+                <h2 class="accordion-header" id="heading{{ resp.id }}">
+                  <button class="accordion-button {% if not loop.first %}collapsed{% endif %} p-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ resp.id }}">
+                    <div class="d-flex justify-content-between align-items-center w-100 me-3 flex-wrap gap-2">
+                      <div class="text-start">
+                        <span class="badge bg-light text-dark border me-2">Q{{ loop.index }}</span>
+                        <strong class="text-dark">{{ q.question_text|truncate(80) }}</strong>
+                      </div>
+                      <div>
+                        <span class="badge bg-primary fs-6 px-3 py-1">Score: {{ resp.overall_score|round(1) }}/10</span>
+                      </div>
+                    </div>
+                  </button>
+                </h2>
+                <div id="collapse{{ resp.id }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#questionsAccordion">
+                  <div class="accordion-body p-4 bg-light">
+                    <!-- Full Question -->
+                    <div class="p-3 bg-white rounded-3 border mb-3">
+                      <strong class="text-primary small text-uppercase d-block mb-1">Full Question:</strong>
+                      <p class="mb-0 fw-semibold text-dark">{{ q.question_text }}</p>
+                    </div>
+
+                    <!-- Candidate Answer -->
+                    <div class="p-3 bg-white rounded-3 border mb-3">
+                      <strong class="text-muted small text-uppercase d-block mb-1">Your Submitted Response:</strong>
+                      <p class="mb-0 text-dark fst-italic">
+                        {{ resp.answer_text if resp.answer_text else 'No response was provided.' }}
+                      </p>
+                    </div>
+
+                    <!-- Individual Rubric Scores -->
+                    <div class="row g-2 mb-3">
+                      <div class="col-6 col-md-3">
+                        <div class="p-2 bg-white rounded border text-center">
+                          <small class="text-muted d-block">Correctness (40%)</small>
+                          <strong class="text-primary fs-6">{{ resp.correctness_score|round(1) }} / 10</strong>
+                        </div>
+                      </div>
+                      <div class="col-6 col-md-3">
+                        <div class="p-2 bg-white rounded border text-center">
+                          <small class="text-muted d-block">Relevance (25%)</small>
+                          <strong class="text-info fs-6">{{ resp.relevance_score|round(1) }} / 10</strong>
+                        </div>
+                      </div>
+                      <div class="col-6 col-md-3">
+                        <div class="p-2 bg-white rounded border text-center">
+                          <small class="text-muted d-block">Completeness (20%)</small>
+                          <strong class="text-success fs-6">{{ resp.completeness_score|round(1) }} / 10</strong>
+                        </div>
+                      </div>
+                      <div class="col-6 col-md-3">
+                        <div class="p-2 bg-white rounded border text-center">
+                          <small class="text-muted d-block">Clarity (15%)</small>
+                          <strong class="text-warning fs-6">{{ resp.clarity_score|round(1) }} / 10</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- AI Feedback -->
+                    <div class="p-3 bg-white rounded-3 border mb-3">
+                      <strong class="text-secondary small text-uppercase d-block mb-1">
+                        <i class="bi bi-chat-left-quote-fill text-primary me-1"></i> AI Feedback:
+                      </strong>
+                      <p class="mb-0 text-dark">{{ resp.feedback }}</p>
+                    </div>
+
+                    <!-- Model Reference Answer -->
+                    <div class="p-3 bg-white rounded-3 border border-success-subtle">
+                      <strong class="text-success small text-uppercase d-block mb-1">
+                        <i class="bi bi-check2-circle me-1"></i> Model Reference Answer:
+                      </strong>
+                      <p class="mb-0 small text-dark">
+                        {{ resp.suggested_answer or (q.reference_answer if q else 'Consult standard documentation.') }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // 1. Radar Chart for Rubric Criteria
+    const radarCtx = document.getElementById("rubricRadarChart");
+    if (radarCtx) {
+      new Chart(radarCtx, {
+        type: "radar",
+        data: {
+          labels: {{ rubric_labels|tojson }},
+          datasets: [{
+            label: "Your Score (0-10)",
+            data: {{ rubric_values|tojson }},
+            fill: true,
+            backgroundColor: "rgba(79, 70, 229, 0.2)",
+            borderColor: "#4f46e5",
+            pointBackgroundColor: "#4f46e5",
+            pointBorderColor: "#fff",
+            pointHoverBackgroundColor: "#fff",
+            pointHoverBorderColor: "#4f46e5",
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              suggestedMin: 0,
+              suggestedMax: 10,
+              ticks: { stepSize: 2 }
+            }
+          }
+        }
+      });
+    }
+
+    // 2. Bar Chart for Question Scores
+    const barCtx = document.getElementById("progressionBarChart");
+    if (barCtx) {
+      new Chart(barCtx, {
+        type: "bar",
+        data: {
+          labels: {{ q_labels|tojson }},
+          datasets: [{
+            label: "Score (out of 100%)",
+            data: {{ q_scores|tojson }},
+            backgroundColor: "#0ea5e9",
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: { stepSize: 25 }
+            }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

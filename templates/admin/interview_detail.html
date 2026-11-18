@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Inspect Interview Session #{{ interview.id }} - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <!-- ADMIN SIDEBAR -->
+  <aside class="app-sidebar">
+    <div class="sidebar-heading">Admin Management</div>
+    <ul class="nav flex-column mb-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+          <i class="bi bi-speedometer2"></i> Overview
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin.questions') }}">
+          <i class="bi bi-question-diamond"></i> Questions
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin.candidates') }}">
+          <i class="bi bi-people"></i> Candidates
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="{{ url_for('admin.interviews') }}">
+          <i class="bi bi-journal-check"></i> Interviews
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin.profile') }}">
+          <i class="bi bi-shield-lock"></i> Security &amp; Password
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- MAIN INTERVIEW DETAIL INSPECTOR -->
+  <main class="app-content">
+    <div class="container-fluid">
+      <!-- BREADCRUMB & ACTIONS -->
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <a href="{{ url_for('admin.interviews') }}" class="btn btn-sm btn-link text-decoration-none ps-0">
+          &larr; Back to Interviews Repository
+        </a>
+        <div class="d-flex gap-2">
+          <a href="{{ url_for('interview.download_pdf', interview_id=interview.id) }}" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
+          </a>
+        </div>
+      </div>
+
+      <!-- METADATA CARD -->
+      <div class="custom-card mb-4 bg-light border-0 shadow-sm">
+        <div class="custom-card-body p-4">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <span class="text-muted small text-uppercase fw-semibold d-block">Candidate</span>
+              <strong class="fs-6 text-dark">{{ interview.candidate.name }}</strong>
+              <small class="text-muted d-block">{{ interview.candidate.email }}</small>
+            </div>
+            <div class="col-md-3">
+              <span class="text-muted small text-uppercase fw-semibold d-block">Session</span>
+              <strong>{{ interview.category }}</strong>
+              {% if interview.topic %}
+                <span class="badge bg-secondary small ms-1">{{ interview.topic }}</span>
+              {% endif %}
+              <div class="small text-muted">{{ interview.difficulty }} Level &bull; {{ interview.input_mode|capitalize }} Mode</div>
+            </div>
+            <div class="col-md-3">
+              <span class="text-muted small text-uppercase fw-semibold d-block">Score & Status</span>
+              <strong class="fs-5 {% if interview.total_score >= 7.5 %}text-success{% elif interview.total_score >= 5.0 %}text-warning{% else %}text-danger{% endif %}">
+                {{ interview.total_score|round(1) }}/10 ({{ (interview.total_score * 10)|round(0)|int }}%)
+              </strong>
+              <span class="badge bg-success-subtle text-success ms-1">{{ interview.status|capitalize }}</span>
+              <div class="small text-muted mt-1">
+                Raw: <strong>{{ interview.raw_score|round(1) }}/10</strong> &bull; 
+                Penalties: <strong class="text-danger">-{{ (interview.proctoring_penalty * 10)|round(0)|int }}%</strong>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <span class="text-muted small text-uppercase fw-semibold d-block">AI Proctoring Audit</span>
+              <span class="badge {% if interview.integrity_score >= 85 %}bg-success{% elif interview.integrity_score >= 70 %}bg-warning text-dark{% else %}bg-danger{% endif %} small">
+                Integrity: {{ interview.integrity_score|round(0)|int }}%
+              </span>
+              <div class="small text-muted mt-1">
+                Tab Switches: <strong class="{% if interview.tab_switch_count > 0 %}text-danger{% endif %}">{{ interview.tab_switch_count }}</strong> &bull; 
+                Violations: <strong class="{% if interview.violations_count > 0 %}text-danger{% endif %}">{{ interview.violations_count }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROCTORING INTEGRITY AUDIT LOGS -->
+      <div class="custom-card shadow-sm border-0 mb-4">
+        <div class="custom-card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold"><i class="bi bi-shield-shaded text-warning me-2"></i> Proctoring & Tab Switch Integrity Logs</h5>
+          <span class="badge bg-secondary">{{ interview.proctoring_logs.count() }} Logged Events</span>
+        </div>
+        <div class="custom-card-body p-3">
+          {% set p_logs = interview.proctoring_logs.all() %}
+          {% if p_logs %}
+            <div class="table-responsive">
+              <table class="table table-sm table-hover align-middle mb-0 small">
+                <thead class="table-light">
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Event Type</th>
+                    <th>Severity</th>
+                    <th>Description</th>
+                    <th class="text-end">Penalty Applied</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for plog in p_logs %}
+                    <tr>
+                      <td class="text-muted">{{ plog.timestamp.strftime('%Y-%m-%d %H:%M:%S') if plog.timestamp else 'N/A' }}</td>
+                      <td>
+                        <span class="badge {% if plog.event_type == 'tab_switch' %}bg-danger{% elif plog.event_type == 'multiple_faces' %}bg-danger{% else %}bg-warning text-dark{% endif %} text-uppercase">
+                          {{ plog.event_type|replace('_', ' ') }}
+                        </span>
+                      </td>
+                      <td><span class="badge bg-light text-dark border">{{ plog.severity|capitalize }}</span></td>
+                      <td>{{ plog.description }}</td>
+                      <td class="text-end text-danger fw-bold">
+                        {% if plog.penalty_applied > 0 %}-{{ (plog.penalty_applied * 10)|round(0)|int }}% (-{{ plog.penalty_applied }} pts){% else %}&mdash;{% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-center py-3 text-muted small">
+              <i class="bi bi-check-circle-fill text-success me-1"></i> No integrity violations or tab switches were logged for this interview session.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- DETAILED RESPONSES REVIEW -->
+      <div class="custom-card shadow-sm border-0">
+        <div class="custom-card-header">
+          <h5 class="mb-0 fw-bold"><i class="bi bi-chat-left-dots me-2 text-primary"></i> Question Responses & Evaluation Details</h5>
+          <span class="badge bg-light text-dark border">{{ responses|length }} Questions Evaluated</span>
+        </div>
+        <div class="custom-card-body p-4">
+          {% for resp in responses %}
+            {% set q = resp.question %}
+            <div class="card mb-4 border">
+              <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                  <span class="badge bg-primary me-2">Q{{ loop.index }}</span>
+                  <strong class="text-dark">{{ q.question_text }}</strong>
+                </div>
+                <div>
+                  <span class="badge bg-primary-subtle text-primary fs-6 px-3 py-1">Score: {{ resp.overall_score|round(1) }}/10</span>
+                </div>
+              </div>
+              <div class="card-body p-3">
+                <!-- Answer text -->
+                <div class="mb-3">
+                  <span class="text-muted small text-uppercase fw-semibold d-block mb-1">Candidate Answer:</span>
+                  <div class="p-2 bg-light rounded fst-italic text-dark small">
+                    {{ resp.answer_text if resp.answer_text else 'No answer provided' }}
+                  </div>
+                </div>
+
+                <!-- Rubric Scores -->
+                <div class="row g-2 mb-3">
+                  <div class="col-3">
+                    <div class="p-2 bg-white rounded border text-center">
+                      <small class="text-muted d-block" style="font-size: 0.75rem;">Correctness (40%)</small>
+                      <strong class="text-primary">{{ resp.correctness_score|round(1) }}/10</strong>
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="p-2 bg-white rounded border text-center">
+                      <small class="text-muted d-block" style="font-size: 0.75rem;">Relevance (25%)</small>
+                      <strong class="text-info">{{ resp.relevance_score|round(1) }}/10</strong>
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="p-2 bg-white rounded border text-center">
+                      <small class="text-muted d-block" style="font-size: 0.75rem;">Completeness (20%)</small>
+                      <strong class="text-success">{{ resp.completeness_score|round(1) }}/10</strong>
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="p-2 bg-white rounded border text-center">
+                      <small class="text-muted d-block" style="font-size: 0.75rem;">Clarity (15%)</small>
+                      <strong class="text-warning">{{ resp.clarity_score|round(1) }}/10</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Feedback -->
+                <div class="mb-2">
+                  <span class="text-secondary small text-uppercase fw-semibold d-block mb-1">Feedback:</span>
+                  <p class="small text-dark mb-0">{{ resp.feedback }}</p>
+                </div>
+
+                <!-- Reference Answer -->
+                {% if q.reference_answer %}
+                  <div class="mt-2 pt-2 border-top">
+                    <span class="text-success small text-uppercase fw-semibold d-block mb-1">Standard Reference Answer:</span>
+                    <p class="small text-muted mb-0">{{ q.reference_answer }}</p>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Profile & Security Settings - AI Interview System{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <!-- ADMIN SIDEBAR -->
+  <aside class="app-sidebar">
+    <div class="sidebar-heading">Admin Management</div>
+    <ul class="nav flex-column mb-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+          <i class="bi bi-speedometer2"></i> Overview
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin.questions') }}">
+          <i class="bi bi-question-diamond"></i> Questions
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin.candidates') }}">
+          <i class="bi bi-people"></i> Candidates
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('admin.interviews') }}">
+          <i class="bi bi-journal-check"></i> Interviews
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="{{ url_for('admin.profile') }}">
+          <i class="bi bi-shield-lock"></i> Security &amp; Password
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- MAIN ADMIN PROFILE CONTENT -->
+  <main class="app-content">
+    <div class="container-fluid">
+      
+      <!-- HEADER -->
+      <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+          <div class="p-3 bg-danger text-white rounded-circle fs-3 d-inline-flex">
+            <i class="bi bi-shield-lock-fill"></i>
+          </div>
+          <div>
+            <h2 class="fw-bold mb-0">{{ current_user.name }}</h2>
+            <span class="text-muted small">
+              {{ current_user.email }} &bull;
+              <span class="badge bg-danger ms-1">Administrator</span> &bull;
+              Platform Control Account
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <!-- Admin Profile Info Form -->
+        <div class="col-lg-6">
+          <div class="custom-card h-100 shadow-sm border-0">
+            <div class="custom-card-header bg-light border-bottom">
+              <h5 class="mb-0 fw-bold"><i class="bi bi-person-gear me-2 text-primary"></i> Administrator Details</h5>
+            </div>
+            <div class="custom-card-body p-4">
+              <form method="POST" action="{{ url_for('admin.profile') }}">
+                <input type="hidden" name="action" value="update_info">
+                
+                <div class="mb-3">
+                  <label for="adminName" class="form-label fw-semibold small">Admin Display Name</label>
+                  <input type="text" class="form-control" id="adminName" name="name" value="{{ current_user.name }}" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="adminEmail" class="form-label fw-semibold small">Admin Email Address</label>
+                  <input type="email" class="form-control bg-light" id="adminEmail" value="{{ current_user.email }}" readonly disabled>
+                  <div class="form-text">Primary administrator account identifier.</div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-6">
+                    <label class="form-label fw-semibold small">Platform Candidates</label>
+                    <input type="text" class="form-control bg-light" value="{{ total_candidates }} registered" readonly disabled>
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label fw-semibold small">Total Interviews</label>
+                    <input type="text" class="form-control bg-light" value="{{ total_interviews }} sessions" readonly disabled>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-save me-1"></i> Save Administrator Details
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Change Password Form -->
+        <div class="col-lg-6">
+          <div class="custom-card h-100 shadow-sm border-0">
+            <div class="custom-card-header bg-light border-bottom">
+              <h5 class="mb-0 fw-bold"><i class="bi bi-key-fill me-2 text-danger"></i> Edit Admin Password</h5>
+            </div>
+            <div class="custom-card-body p-4">
+              <form method="POST" action="{{ url_for('admin.profile') }}">
+                <input type="hidden" name="action" value="change_password">
+
+                <div class="mb-3">
+                  <label for="current_password" class="form-label fw-semibold small">Current Admin Password</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-shield-check text-muted"></i></span>
+                    <input type="password" class="form-control" id="current_password" name="current_password" required placeholder="Enter current password">
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="new_password" class="form-label fw-semibold small">New Admin Password</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-lock text-muted"></i></span>
+                    <input type="password" class="form-control" id="new_password" name="new_password" minlength="6" required placeholder="Minimum 6 characters">
+                  </div>
+                </div>
+
+                <div class="mb-4">
+                  <label for="confirm_password" class="form-label fw-semibold small">Confirm New Admin Password</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-lock-fill text-muted"></i></span>
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="6" required placeholder="Re-enter new password">
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-danger fw-semibold">
+                  <i class="bi bi-check-circle-fill me-1"></i> Update Admin Password
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+{% endblock %}

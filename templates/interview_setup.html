@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}Configure Interview Session - AI Interview System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- HEADER -->
+      <div class="text-center mb-4">
+        <span class="brand-badge mb-2 d-inline-block"><i class="bi bi-gear-wide-connected me-1"></i> SESSION SETUP</span>
+        <h2 class="fw-bold">Configure Your AI Interview</h2>
+        <p class="text-muted">Tailor the category, technical domain, difficulty, and input format before you start.</p>
+      </div>
+
+      <!-- RESUME INTERVIEW SHORTCUT CARD -->
+      <div class="card border-0 rounded-4 mb-4 shadow-sm" style="background: linear-gradient(135deg, #6610f2 0%, #0d6efd 100%);">
+        <div class="card-body p-4">
+          <div class="row align-items-center g-3">
+            <div class="col-md-8 text-white">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-file-person-fill fs-4"></i>
+                <h5 class="mb-0 fw-bold">Get a Personalised Interview from Your Resume</h5>
+              </div>
+              <p class="mb-0 opacity-75 small">
+                Upload your CV and our AI generates custom questions based on <em>your exact</em> skills, projects, and experience.
+              </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+              <a href="{{ url_for('interview.resume_setup') }}" class="btn btn-light btn-lg fw-bold rounded-3 px-4">
+                <i class="bi bi-upload me-2"></i>Upload Resume
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center text-muted small mb-4">
+        <span class="px-3">— or configure a standard interview below —</span>
+      </div>
+
+      <div class="card shadow-lg border-0 rounded-4 overflow-hidden mb-4">
+        <div class="card-body p-4 p-md-5">
+          <form method="POST" action="{{ url_for('interview.setup') }}">
+            <!-- 1. CATEGORY SELECTION -->
+            <div class="mb-4">
+              <label class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">1. Select Interview Category</label>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <input type="radio" class="btn-check" name="category" id="catTech" value="Technical" checked onchange="toggleCategoryOptions('Technical')">
+                  <label class="btn btn-outline-primary w-100 p-3 text-start rounded-3 h-100" for="catTech">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <i class="bi bi-code-square fs-4"></i>
+                      <strong class="fs-6">Technical</strong>
+                    </div>
+                    <small class="text-muted d-block">CS fundamentals, languages, databases & AI concepts.</small>
+                  </label>
+                </div>
+
+                <div class="col-md-4">
+                  <input type="radio" class="btn-check" name="category" id="catHR" value="HR" onchange="toggleCategoryOptions('HR')">
+                  <label class="btn btn-outline-primary w-100 p-3 text-start rounded-3 h-100" for="catHR">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <i class="bi bi-people fs-4"></i>
+                      <strong class="fs-6">HR & Behavioral</strong>
+                    </div>
+                    <small class="text-muted d-block">Behavioral questions, teamwork, leadership & STAR method.</small>
+                  </label>
+                </div>
+
+                <div class="col-md-4">
+                  <input type="radio" class="btn-check" name="category" id="catApt" value="Aptitude" onchange="toggleCategoryOptions('Aptitude')">
+                  <label class="btn btn-outline-primary w-100 p-3 text-start rounded-3 h-100" for="catApt">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <i class="bi bi-puzzle fs-4"></i>
+                      <strong class="fs-6">Aptitude</strong>
+                    </div>
+                    <small class="text-muted d-block">Quantitative logic, reasoning puzzles & math problem-solving.</small>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. TECHNICAL TOPIC (Conditional) -->
+            <div class="mb-4" id="topicSelectionGroup">
+              <label for="topic" class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">2. Technical Topic / Subject</label>
+              <select class="form-select form-select-lg" id="topic" name="topic">
+                {% for topic_item in technical_topics %}
+                  <option value="{{ topic_item }}">{{ topic_item }}</option>
+                {% endfor %}
+              </select>
+              <div class="form-text">Choose the specialized technical topic you want the AI to evaluate.</div>
+            </div>
+
+            <!-- 3. DIFFICULTY & QUESTION COUNT -->
+            <div class="row g-4 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">3. Difficulty Level</label>
+                <div class="d-flex gap-2">
+                  <input type="radio" class="btn-check" name="difficulty" id="diffEasy" value="Easy">
+                  <label class="btn btn-outline-success flex-fill py-2" for="diffEasy">Easy</label>
+
+                  <input type="radio" class="btn-check" name="difficulty" id="diffMed" value="Medium" checked>
+                  <label class="btn btn-outline-warning flex-fill py-2" for="diffMed">Medium</label>
+
+                  <input type="radio" class="btn-check" name="difficulty" id="diffHard" value="Hard">
+                  <label class="btn btn-outline-danger flex-fill py-2" for="diffHard">Hard</label>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">4. Number of Questions</label>
+                <div class="d-flex gap-2">
+                  <input type="radio" class="btn-check" name="question_count" id="qc5" value="5" checked>
+                  <label class="btn btn-outline-secondary flex-fill py-2" for="qc5">5 Questions</label>
+
+                  <input type="radio" class="btn-check" name="question_count" id="qc10" value="10">
+                  <label class="btn btn-outline-secondary flex-fill py-2" for="qc10">10 Questions</label>
+
+                  <input type="radio" class="btn-check" name="question_count" id="qc15" value="15">
+                  <label class="btn btn-outline-secondary flex-fill py-2" for="qc15">15 Questions</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. INPUT MODE -->
+            <div class="mb-4">
+              <label class="form-label fw-bold text-dark small text-uppercase letter-spacing-1">5. Preferred Input Mode</label>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <input type="radio" class="btn-check" name="input_mode" id="modeText" value="text" checked>
+                  <label class="btn btn-outline-secondary w-100 p-3 text-start rounded-3 h-100" for="modeText">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <i class="bi bi-keyboard-fill text-primary fs-5"></i>
+                      <strong>Text Typing Mode</strong>
+                    </div>
+                    <small class="text-muted d-block">Type your answers in the structured rich editor.</small>
+                  </label>
+                </div>
+
+                <div class="col-md-6">
+                  <input type="radio" class="btn-check" name="input_mode" id="modeVoice" value="voice">
+                  <label class="btn btn-outline-secondary w-100 p-3 text-start rounded-3 h-100" for="modeVoice">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <i class="bi bi-mic-fill text-danger fs-5"></i>
+                      <strong>Voice & Speech Mode</strong>
+                    </div>
+                    <small class="text-muted d-block">Speak your answers with real-time Speech-to-Text transcription.</small>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 6. FACE CONFIGURATION & AI PROCTORING SETUP -->
+            <div class="mb-4 p-4 bg-light rounded-4 border">
+              <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                  <h6 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-camera-video-fill text-primary me-2"></i> Face Configuration & Proctoring Verification
+                  </h6>
+                  <small class="text-muted">Ensure your camera is enabled and your face is centered and well-lit.</small>
+                </div>
+                <span id="proctorStatusBadge" class="badge bg-secondary">
+                  <i class="bi bi-camera me-1"></i> Initializing Camera...
+                </span>
+              </div>
+
+              <div class="row g-3 align-items-center">
+                <div class="col-md-5 text-center">
+                  <div class="position-relative d-inline-block rounded-3 overflow-hidden shadow-sm bg-dark" style="width: 100%; max-width: 240px; height: 160px;">
+                    <video id="faceConfigVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                    <div class="position-absolute bottom-0 start-0 end-0 p-1 bg-dark bg-opacity-75 text-white small" style="font-size: 0.72rem;">
+                      <i class="bi bi-person-bounding-box me-1"></i> Live Calibration Feed
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-7">
+                  <div class="p-3 bg-white rounded-3 border">
+                    <h6 class="fw-bold text-danger small text-uppercase mb-2">
+                      <i class="bi bi-shield-exclamation me-1"></i> Mandatory Integrity Rules:
+                    </h6>
+                    <ul class="small text-muted mb-0 ps-3">
+                      <li class="mb-1"><strong>Tab Switching Penalty:</strong> Navigating away from the interview tab automatically deducts <strong>5% from your final score</strong> per occurrence.</li>
+                      <li class="mb-1"><strong>Single Candidate Frame:</strong> No other person or face may enter the camera frame during the session.</li>
+                      <li><strong>Prohibited Devices:</strong> Mobile phones, auxiliary screens, or notes in the camera view will be flagged.</li>
+                    </ul>
+                  </div>
+                  <div id="cameraSetupFeedback" class="mt-2"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SESSION INSTRUCTIONS -->
+            <div class="p-3 bg-light rounded-3 border mb-4 small text-muted">
+              <h6 class="fw-bold text-dark mb-2"><i class="bi bi-info-circle-fill text-primary me-2"></i> How the Interview Works:</h6>
+              <ul class="mb-0 ps-3">
+                <li>Questions appear one by one with an active elapsed timer.</li>
+                <li>You can use the <strong>Read Aloud</strong> button to have the AI voice read questions to you.</li>
+                <li>Your responses are evaluated instantaneously against technical correctness, relevance, completeness, and clarity.</li>
+                <li>Upon completion, a comprehensive scorecard, analytics, and downloadable PDF report are generated.</li>
+              </ul>
+            </div>
+
+            <button type="submit" class="btn btn-primary-gradient btn-lg w-100 py-3 fw-bold">
+              <i class="bi bi-play-circle-fill me-2"></i> Launch Interview Session Now
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/proctor.js') }}"></script>
+<script>
+  function toggleCategoryOptions(cat) {
+    const topicGroup = document.getElementById("topicSelectionGroup");
+    if (cat === "Technical") {
+      topicGroup.style.display = "block";
+    } else {
+      topicGroup.style.display = "none";
+    }
+  }
+</script>
+{% endblock %}

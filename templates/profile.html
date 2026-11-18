@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile & Settings - AI Interview System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="d-flex align-items-center gap-3 mb-4 pb-2 border-bottom">
+        <div class="p-3 bg-primary text-white rounded-circle fs-3 d-inline-flex">
+          <i class="bi bi-person-fill"></i>
+        </div>
+        <div>
+          <h2 class="fw-bold mb-0">{{ current_user.name }}</h2>
+          <span class="text-muted small">{{ current_user.email }} &bull; Role: <strong class="text-capitalize">{{ current_user.role }}</strong></span>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <!-- Profile Info Form -->
+        <div class="col-md-6">
+          <div class="custom-card h-100">
+            <div class="custom-card-header">
+              <h5 class="mb-0 fw-bold"><i class="bi bi-person-gear me-2 text-primary"></i> Personal Information</h5>
+            </div>
+            <div class="custom-card-body">
+              <form method="POST" action="{{ url_for('candidate.profile') }}">
+                <input type="hidden" name="action" value="update_info">
+                
+                <div class="mb-3">
+                  <label for="name" class="form-label fw-semibold small">Full Name</label>
+                  <input type="text" class="form-control" id="name" name="name" value="{{ current_user.name }}" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="email" class="form-label fw-semibold small">Email Address</label>
+                  <input type="email" class="form-control bg-light" id="email" value="{{ current_user.email }}" readonly disabled>
+                  <div class="form-text">Email address is permanently associated with your candidate record.</div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-semibold small">Total Completed Interviews</label>
+                  <input type="text" class="form-control bg-light" value="{{ total_completed }} interviews" readonly disabled>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Change Password Form -->
+        <div class="col-md-6">
+          <div class="custom-card h-100">
+            <div class="custom-card-header">
+              <h5 class="mb-0 fw-bold"><i class="bi bi-shield-lock me-2 text-primary"></i> Change Password</h5>
+            </div>
+            <div class="custom-card-body">
+              <form method="POST" action="{{ url_for('candidate.profile') }}">
+                <input type="hidden" name="action" value="change_password">
+
+                <div class="mb-3">
+                  <label for="current_password" class="form-label fw-semibold small">Current Password</label>
+                  <input type="password" class="form-control" id="current_password" name="current_password" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="new_password" class="form-label fw-semibold small">New Password</label>
+                  <input type="password" class="form-control" id="new_password" name="new_password" minlength="6" required>
+                </div>
+
+                <div class="mb-4">
+                  <label for="confirm_password" class="form-label fw-semibold small">Confirm New Password</label>
+                  <input type="password" class="form-control" id="confirm_password" name="confirm_password" minlength="6" required>
+                </div>
+
+                <button type="submit" class="btn btn-warning text-dark fw-semibold">Update Password</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

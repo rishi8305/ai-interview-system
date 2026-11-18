@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}AI Interview System - Automated Intelligence Assessment Platform{% endblock %}
+
+{% block content %}
+<!-- HERO SECTION -->
+<section class="hero-gradient">
+  <div class="container text-center py-5">
+    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-4 rounded-pill bg-white border shadow-sm">
+      <span class="badge bg-primary">New</span>
+      <span class="small fw-semibold text-secondary">B.Tech Minor Project &bull; Full-Stack AI Interview Platform</span>
+    </div>
+
+    <h1 class="display-4 fw-extrabold text-dark tracking-tight mb-3">
+      Master Interviews with <span class="text-primary text-gradient">AI-Powered Precision</span>
+    </h1>
+    <p class="lead text-muted mx-auto mb-4" style="max-width: 720px;">
+      An intelligent evaluation system that conducts technical, HR, and aptitude interviews, evaluates your spoken and written responses using rigorous NLP rubrics, and provides instant personalized feedback.
+    </p>
+
+    <div class="d-flex justify-content-center gap-3 flex-wrap mb-5">
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary-gradient btn-lg px-4 shadow">
+        <i class="bi bi-rocket-takeoff-fill me-2"></i> Start Free Practice
+      </a>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg px-4">
+        <i class="bi bi-box-arrow-in-right me-2"></i> Sign In to Dashboard
+      </a>
+    </div>
+
+    <!-- Quick Demo Credentials Banner -->
+    <div class="card border-0 shadow-sm mx-auto p-3" style="max-width: 680px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 text-start">
+        <div>
+          <span class="badge bg-info text-dark me-2">Demo Logins</span>
+          <span class="small text-muted"><strong>Candidate:</strong> candidate@aiinterview.com / Candidate@123</span>
+        </div>
+        <div>
+          <span class="small text-muted"><strong>Admin:</strong> admin@aiinterview.com / Admin@123</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CORE CAPABILITIES SECTION -->
+<section id="features" class="py-5 bg-white border-top">
+  <div class="container py-4">
+    <div class="text-center mb-5">
+      <h6 class="text-primary text-uppercase fw-bold letter-spacing-1">Features & Capabilities</h6>
+      <h2 class="fw-bold">Everything You Need to Ace Modern Interviews</h2>
+      <p class="text-muted">Designed following enterprise hiring rubrics and natural language processing.</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="stat-card h-100">
+          <div class="stat-icon indigo mb-3">
+            <i class="bi bi-cpu"></i>
+          </div>
+          <h5 class="fw-bold">AI-Driven Response Evaluation</h5>
+          <p class="text-muted small">
+            Every answer is assessed against a standardized 4-part scoring rubric for Technical Correctness (40%), Relevance (25%), Completeness (20%), and Clarity (15%).
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="stat-card h-100">
+          <div class="stat-icon blue mb-3">
+            <i class="bi bi-mic-fill"></i>
+          </div>
+          <h5 class="fw-bold">Dual Voice & Text Engine</h5>
+          <p class="text-muted small">
+            Speak answers naturally using browser speech recognition or type via an accessible editor. Questions can also be read aloud via SpeechSynthesis.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="stat-card h-100">
+          <div class="stat-icon green mb-3">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+          </div>
+          <h5 class="fw-bold">Downloadable PDF Reports</h5>
+          <p class="text-muted small">
+            Instantly export candidate performance reports generated via ReportLab with rubric visualizations, model reference answers, and growth plans.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="stat-card h-100">
+          <div class="stat-icon purple mb-3">
+            <i class="bi bi-graph-up-arrow"></i>
+          </div>
+          <h5 class="fw-bold">Performance Analytics</h5>
+          <p class="text-muted small">
+            Interactive Chart.js radar and progression charts display your strengths, weaknesses, and improvement trajectory over successive interview sessions.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="stat-card h-100">
+          <div class="stat-icon indigo mb-3">
+            <i class="bi bi-sliders"></i>
+          </div>
+          <h5 class="fw-bold">Configurable Difficulty</h5>
+          <p class="text-muted small">
+            Customize sessions by category, topic, question count (5, 10, 15), and difficulty (Easy, Medium, Hard) to match your preparation target.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="stat-card h-100">
+          <div class="stat-icon blue mb-3">
+            <i class="bi bi-shield-lock-fill"></i>
+          </div>
+          <h5 class="fw-bold">Enterprise Role-Based Access</h5>
+          <p class="text-muted small">
+            Dedicated administrative panel for managing interview question repositories, reviewing candidate logs, and tracking system-wide metrics.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERVIEW CATEGORIES -->
+<section id="categories" class="py-5 bg-light border-top">
+  <div class="container py-4">
+    <div class="text-center mb-5">
+      <h6 class="text-primary text-uppercase fw-bold">Supported Disciplines</h6>
+      <h2 class="fw-bold">Comprehensive Question Repositories</h2>
+      <p class="text-muted">Targeted preparation tailored for modern tech roles.</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="custom-card h-100 border-primary">
+          <div class="custom-card-header bg-primary text-white">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-code-slash me-2"></i> Technical Interviews</h5>
+          </div>
+          <div class="custom-card-body">
+            <p class="text-muted small mb-3">In-depth assessment of engineering competencies and system fundamentals:</p>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge bg-light text-dark border">Python</span>
+              <span class="badge bg-light text-dark border">Java</span>
+              <span class="badge bg-light text-dark border">SQL</span>
+              <span class="badge bg-light text-dark border">DBMS</span>
+              <span class="badge bg-light text-dark border">OOP</span>
+              <span class="badge bg-light text-dark border">Data Structures</span>
+              <span class="badge bg-light text-dark border">Machine Learning</span>
+              <span class="badge bg-light text-dark border">Artificial Intelligence</span>
+              <span class="badge bg-light text-dark border">Web Development</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="custom-card h-100">
+          <div class="custom-card-header bg-secondary text-white">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-people-fill me-2"></i> HR & Behavioral</h5>
+          </div>
+          <div class="custom-card-body">
+            <p class="text-muted small mb-3">Structured situational questions to evaluate soft skills and team dynamics:</p>
+            <ul class="list-unstyled small text-muted mb-0">
+              <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> STAR method response evaluation</li>
+              <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Conflict resolution & teamwork</li>
+              <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Leadership & accountability</li>
+              <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Stress & deadline management</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="custom-card h-100">
+          <div class="custom-card-header bg-dark text-white">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-puzzle-fill me-2"></i> Aptitude & Reasoning</h5>
+          </div>
+          <div class="custom-card-body">
+            <p class="text-muted small mb-3">Logical problem solving and analytical thinking for campus placements:</p>
+            <ul class="list-unstyled small text-muted mb-0">
+              <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Quantitative arithmetic</li>
+              <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Logical deduction & coding patterns</li>
+              <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Critical thinking puzzles</li>
+              <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Time, distance & rate calculations</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCORING RUBRIC SECTION -->
+<section id="rubric" class="py-5 bg-white border-top">
+  <div class="container py-4">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <h6 class="text-primary text-uppercase fw-bold">Evaluation Standards</h6>
+        <h2 class="fw-bold mb-3">Objective, Multi-Dimensional AI Scoring Rubric</h2>
+        <p class="text-muted">
+          Our evaluation engine analyzes candidate responses mathematically across four distinct dimensions without demographic or visual bias.
+        </p>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="fw-semibold">1. Technical Correctness</span>
+            <span class="text-primary fw-bold">40% Weight</span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar bg-primary" style="width: 40%"></div>
+          </div>
+          <small class="text-muted">Accuracy of concepts, facts, syntax, and logic.</small>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="fw-semibold">2. Relevance to Prompt</span>
+            <span class="text-info fw-bold">25% Weight</span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar bg-info" style="width: 25%"></div>
+          </div>
+          <small class="text-muted">Directness and precision in addressing what was specifically asked.</small>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="fw-semibold">3. Completeness & Depth</span>
+            <span class="text-success fw-bold">20% Weight</span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar bg-success" style="width: 20%"></div>
+          </div>
+          <small class="text-muted">Coverage of key sub-concepts, edge cases, and practical trade-offs.</small>
+        </div>
+
+        <div>
+          <div class="d-flex justify-content-between mb-1">
+            <span class="fw-semibold">4. Clarity & Articulation</span>
+            <span class="text-warning fw-bold">15% Weight</span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar bg-warning" style="width: 15%"></div>
+          </div>
+          <small class="text-muted">Structured communication, transition words, and coherent phrasing.</small>
+        </div>
+      </div>
+
+      <div class="col-lg-6 text-center">
+        <div class="card border-0 shadow-lg p-4 bg-light">
+          <h5 class="fw-bold mb-3 text-secondary">Sample AI Evaluation Output</h5>
+          <div class="text-start bg-white p-3 rounded border font-monospace small" style="max-height: 320px; overflow-y: auto;">
+            <pre class="mb-0"><code>{
+  "correctness": 8.5,
+  "relevance": 9.0,
+  "completeness": 8.0,
+  "clarity": 8.5,
+  "overall_score": 8.5,
+  "strengths": [
+    "Accurately defined mutability vs immutability.",
+    "Correctly noted hashability implications for dict keys."
+  ],
+  "weaknesses": [
+    "Could detail internal CPython memory allocation differences."
+  ],
+  "feedback": "Strong foundational explanation with clear syntax distinctions.",
+  "suggested_answer": "Lists are mutable with dynamic sizing; tuples are immutable...",
+  "improvement_tips": [
+    "Mention memory overhead and indexing performance trade-offs."
+  ]
+}</code></pre>
+          </div>
+          <small class="text-muted mt-2 text-start d-block">Structured JSON validated before storage in the database.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOTTOM CALL TO ACTION -->
+<section class="py-5 bg-primary text-white text-center">
+  <div class="container py-4">
+    <h2 class="display-6 fw-bold mb-3">Ready to Practice Your Next Interview?</h2>
+    <p class="lead opacity-75 mb-4">Create your candidate account in seconds and start an automated session.</p>
+    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-4 text-primary fw-bold shadow">
+      <i class="bi bi-person-plus-fill me-2"></i> Register as Candidate
+    </a>
+  </div>
+</section>
+{% endblock %}

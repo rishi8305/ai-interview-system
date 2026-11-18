@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Live Interview - Question {{ question_index }} of {{ total_questions }} - AI Interview System{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+  <div class="row justify-content-center g-4">
+    
+    <!-- LEFT / MAIN INTERVIEW COLUMN -->
+    <div class="col-lg-8 col-xl-8">
+      
+      <!-- TOP CONTROL & PROGRESS BAR -->
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge badge-custom badge-{{ interview.category|lower }} px-3 py-2 fs-6">
+            {{ interview.category }}{% if interview.topic %} &bull; {{ interview.topic }}{% endif %}
+          </span>
+          <span class="badge badge-custom badge-{{ interview.difficulty|lower }} px-2 py-1">
+            {{ interview.difficulty }} Level
+          </span>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <!-- Proctoring Tab Switch Badge -->
+          <span id="proctorTabBadge" class="badge bg-light text-secondary border px-3 py-2">
+            <i class="bi bi-shield-check text-success me-1"></i> Tab Switches: {{ interview.tab_switch_count }}
+          </span>
+
+          <!-- Timer -->
+          <div class="d-flex align-items-center gap-2 bg-white px-3 py-1 rounded-pill border shadow-sm">
+            <i class="bi bi-stopwatch text-danger"></i>
+            <span class="fw-bold font-monospace text-dark" id="interviewTimer">00:00</span>
+          </div>
+          <!-- Question Counter -->
+          <span class="fw-semibold text-secondary small">
+            Question <span class="text-primary fw-bold fs-6">{{ question_index }}</span> of {{ total_questions }}
+          </span>
+        </div>
+      </div>
+
+      <!-- PROGRESS BAR -->
+      <div class="progress mb-4" style="height: 6px;">
+        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ progress_percentage }}%"></div>
+      </div>
+
+      <!-- INTERVIEW QUESTION CARD -->
+      <div class="custom-card mb-4 shadow-sm border-0">
+        <div class="custom-card-body p-4 p-md-5">
+          
+          <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+            <span class="badge bg-light text-primary border small fw-bold">QUESTION #{{ question_index }}</span>
+            
+            <!-- TTS Question Audio Readout -->
+            <button id="ttsReadBtn" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1">
+              <i class="bi bi-volume-up-fill me-1"></i> Read Aloud
+            </button>
+          </div>
+
+          <!-- QUESTION TEXT -->
+          <div class="question-text-display mb-4" id="questionText">
+            {{ question.question_text }}
+          </div>
+
+          <!-- VOICE / SPEECH CONTROLS (Always accessible) -->
+          <div class="p-3 bg-light rounded-3 border mb-3">
+            <div id="voiceSupportAlert" class="alert alert-warning small py-2 d-none mb-2"></div>
+
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+              <div class="d-flex align-items-center gap-3">
+                <button type="button" id="micToggleBtn" class="pulse-mic mic-inactive" title="Toggle microphone for voice speech-to-text">
+                  <i class="bi bi-mic-mute-fill"></i>
+                </button>
+                <div>
+                  <div id="micStatusText" class="small fw-semibold">
+                    <span class="text-muted"><i class="bi bi-mic me-1"></i> Click microphone to start voice input</span>
+                  </div>
+                  <small class="text-muted d-block">Speech will transcribe directly into the editor below</small>
+                </div>
+              </div>
+
+              <!-- Animated Waveform (shown when recording) -->
+              <div id="micWaveform" class="d-none">
+                <span class="waveform-bar"></span>
+                <span class="waveform-bar" style="animation-delay: 0.2s"></span>
+                <span class="waveform-bar" style="animation-delay: 0.4s"></span>
+                <span class="waveform-bar" style="animation-delay: 0.1s"></span>
+                <span class="waveform-bar" style="animation-delay: 0.3s"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ANSWER SUBMISSION FORM -->
+          <form id="interviewForm" method="POST" action="{{ url_for('interview.submit', interview_id=interview.id) }}">
+            <input type="hidden" id="questionId" name="question_id" value="{{ question.id }}">
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label for="answerTextarea" class="form-label fw-bold text-dark small text-uppercase mb-0">
+                  Your Response (Type or Speak)
+                </label>
+                <span class="small text-muted">
+                  Words: <strong id="wordCount" class="text-primary">0</strong> &bull; 
+                  Characters: <span id="charCount">0</span>
+                </span>
+              </div>
+
+              <textarea 
+                id="answerTextarea" 
+                name="answer_text" 
+                class="form-control p-3 fs-6" 
+                rows="8" 
+                placeholder="Structure your answer clearly. Provide definitions, logic, core principles, and relevant examples..." 
+                autofocus></textarea>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2">
+              <span class="small text-muted">
+                <i class="bi bi-keyboard me-1"></i> Tip: Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to submit
+              </span>
+
+              <button type="button" id="submitAnswerBtn" class="btn btn-primary-gradient btn-lg px-4 fw-bold">
+                <i class="bi bi-arrow-right-circle-fill me-2"></i> Submit & Next Question
+              </button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PROCTORING VIDEO & INTEGRITY WIDGET -->
+    <div class="col-lg-4 col-xl-3">
+      <div class="custom-card shadow-sm border-0 sticky-top" style="top: 80px;">
+        <div class="custom-card-header py-2 px-3 bg-light d-flex justify-content-between align-items-center">
+          <span class="small fw-bold text-dark">
+            <i class="bi bi-camera-video-fill text-danger me-1"></i> AI Proctoring Feed
+          </span>
+          <span id="proctorStatusBadge" class="badge bg-success" style="font-size: 0.7rem;">
+            <i class="bi bi-person-check-fill me-1"></i> Initializing...
+          </span>
+        </div>
+
+        <div class="custom-card-body p-2 bg-dark rounded-bottom text-center">
+          <div class="position-relative rounded overflow-hidden shadow-sm" style="width: 100%; height: 210px; background: #000;">
+            <video id="proctorVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+            <div class="position-absolute bottom-0 start-0 end-0 p-1 bg-dark bg-opacity-75 text-white small" style="font-size: 0.7rem;">
+              <i class="bi bi-broadcast me-1 text-danger"></i> Live Stream Guard Active
+            </div>
+          </div>
+
+          <div class="p-2 mt-2 bg-white bg-opacity-10 rounded text-start text-white small" style="font-size: 0.75rem;">
+            <div class="mb-1 d-flex justify-content-between">
+              <span>Face Presence:</span>
+              <strong class="text-success">Monitored (1 Person)</strong>
+            </div>
+            <div class="mb-1 d-flex justify-content-between">
+              <span>Object Shield:</span>
+              <strong class="text-info">No Phones / Books</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span>Tab Switch Guard:</span>
+              <strong class="text-warning">-5% per tab switch</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PROCTORING ALERT MODAL -->
+<div class="modal fade" id="proctorAlertModal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger shadow-lg">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-shield-exclamation me-2"></i> Integrity Policy Violation
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <div id="proctorAlertMsg"></div>
+      </div>
+      <div class="modal-footer justify-content-center bg-light">
+        <button type="button" class="btn btn-danger px-4 fw-semibold" data-bs-dismiss="modal">
+          I Acknowledge & Return to Interview
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI EVALUATION LOADING OVERLAY -->
+<div id="evalOverlay" class="eval-overlay">
+  <div class="text-center p-4 bg-dark bg-opacity-75 rounded-4 shadow-lg border border-secondary" style="max-width: 450px;">
+    <div class="spinner-border text-primary mb-3" style="width: 3.5rem; height: 3.5rem;" role="status">
+      <span class="visually-hidden">Evaluating...</span>
+    </div>
+    <h5 class="fw-bold text-white mb-2">AI Rubric Evaluation in Progress</h5>
+    <p id="evalStatusMsg" class="small text-light text-opacity-75 mb-0">
+      Analyzing response against technical correctness, relevance, completeness, and clarity...
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- TensorFlow.js and COCO-SSD for Real-Time Client Object & Person Detection -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+<script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+<script src="{{ url_for('static', filename='js/interview.js') }}"></script>
+<script src="{{ url_for('static', filename='js/proctor.js') }}"></script>
+{% endblock %}
