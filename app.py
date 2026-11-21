@@ -18,14 +18,17 @@ def create_app(config_class=Config):
     db.init_app(app)
 
     # Automatically ensure SQLite schema columns exist on startup
+    # Initialize database and seed default data
     with app.app_context():
         try:
             db.create_all()
             auto_migrate_columns(app)
-        except Exception as e:
-            app.logger.warning(f"Database auto-migrate notice: {e}")
+            seed_database(app)
+            app.logger.info("Database initialization and seeding completed.")
 
-    # Initialize Flask-Login
+        except Exception as e:
+            app.logger.exception(f"Database initialization failed: {e}")
+   # Initialize Flask-Login
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
     login_manager.login_message = "Please sign in to access this page."
