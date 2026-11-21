@@ -234,6 +234,7 @@ def _finalize_interview(interview):
     interview.integrity_score = proctor_metrics["integrity_score"]
     interview.status = "completed"
     interview.completed_at = datetime.utcnow()
+    interview.save()
 
     existing_result = Result.query.filter_by(interview_id=interview.id).first()
     if not existing_result:
@@ -264,6 +265,7 @@ def _finalize_interview(interview):
         existing_result.tab_switch_count = interview.tab_switch_count
         existing_result.violations_count = interview.violations_count
         existing_result.integrity_score = proctor_metrics["integrity_score"]
+        existing_result.save()
 
     db.session.commit()
 
