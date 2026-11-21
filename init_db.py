@@ -16,7 +16,7 @@ def seed_database(app: Flask):
     """Seed default administrator, sample candidate, and questions in MongoDB."""
     with app.app_context():
         # Ensure database is connected
-        db.init_app(app)
+        
 
         # Seed Default Administrator
         admin_email = "admin@aiinterview.com"
