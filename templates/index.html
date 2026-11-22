@@ -239,36 +239,88 @@
         </div>
       </div>
 
-      <div class="col-lg-6 text-center">
-        <div class="card border-0 shadow-lg p-4 bg-light">
-          <h5 class="fw-bold mb-3 text-secondary">Sample AI Evaluation Output</h5>
-          <div class="text-start bg-white p-3 rounded border font-monospace small" style="max-height: 320px; overflow-y: auto;">
-            <pre class="mb-0"><code>{
-  "correctness": 8.5,
-  "relevance": 9.0,
-  "completeness": 8.0,
-  "clarity": 8.5,
-  "overall_score": 8.5,
-  "strengths": [
-    "Accurately defined mutability vs immutability.",
-    "Correctly noted hashability implications for dict keys."
-  ],
-  "weaknesses": [
-    "Could detail internal CPython memory allocation differences."
-  ],
-  "feedback": "Strong foundational explanation with clear syntax distinctions.",
-  "suggested_answer": "Lists are mutable with dynamic sizing; tuples are immutable...",
-  "improvement_tips": [
-    "Mention memory overhead and indexing performance trade-offs."
-  ]
-}</code></pre>
-          </div>
-          <small class="text-muted mt-2 text-start d-block">Structured JSON validated before storage in the database.</small>
-        </div>
-      </div>
+
+<div class="col-lg-6">
+  <div class="card border-0 shadow-lg p-4 bg-light h-100">
+    <h5 class="fw-bold text-secondary text-center mb-4">
+      AI Evaluation Score Chart
+    </h5>
+
+    <div class="bg-white rounded-4 border p-4" style="height: 350px;">
+      <canvas id="evaluationBarChart"></canvas>
     </div>
+
+    <p class="text-muted text-center small mt-3 mb-0">
+      Sample AI candidate evaluation scores
+    </p>
   </div>
-</section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const canvas = document.getElementById("evaluationBarChart");
+
+  if (!canvas) return;
+
+  new Chart(canvas, {
+    type: "bar",
+    data: {
+      labels: [
+        "Correctness",
+        "Relevance",
+        "Completeness",
+        "Clarity"
+      ],
+      datasets: [{
+        label: "AI Evaluation Score",
+        data: [8.5, 7.0, 8.0, 6.5],
+        backgroundColor: [
+          "#0d6efd",
+          "#198754",
+          "#0dcaf0",
+          "#ffc107"
+        ],
+        borderRadius: 8,
+        barThickness: 35
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 10,
+          ticks: {
+            stepSize: 2
+          },
+          title: {
+            display: true,
+            text: "Score (out of 10)"
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      }
+    }
+  });
+});
+</script>
+
+    </div>  <!-- row close -->
+  </div>    <!-- container close -->
+</section>  <!-- rubric section close -->
+
+
 
 <!-- BOTTOM CALL TO ACTION -->
 <section class="py-5 bg-primary text-white text-center">
