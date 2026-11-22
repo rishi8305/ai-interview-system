@@ -57,7 +57,9 @@ class Config:
     MAIL_USERNAME = os.getenv("MAIL_USERNAME", "").strip()
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "").strip()
     MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "noreply@aiinterview.com").strip()
-
+    # Resend Email API Configuration
+    RESEND_API_KEY = os.getenv("RESEND_API_KEY", "").strip()
+    RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "").strip()
 
 class TestConfig(Config):
     """Testing configuration."""
