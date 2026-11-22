@@ -170,28 +170,31 @@ def forgot_password():
         token = generate_reset_token(user.email)
         reset_link = url_for("auth.reset_password", token=token, _external=True)
 
-        # 3. DISPATCH RESET LINK TO REGISTERED EMAIL VIA SMTP
+        # 3. SEND RESET LINK VIA BREVO API
         sent_success, send_msg = EmailService.send_password_reset_email(
             to_email=user.email,
             recipient_name=user.name,
             reset_url=reset_link,
         )
 
-        email_sent = True
-        current_app.logger.info(f"[PASSWORD RESET DISPATCH] User: {user.email} | URL: {reset_link}")
+        email_sent = sent_success
 
         if sent_success:
-            flash(f"A password reset link has been dispatched to your registered email ({user.email}). Please check your inbox and spam folder.", "success")
+            current_app.logger.info(
+                f"Password reset email successfully sent to {user.email}"
+            )
+            flash(
+                f"A password reset link has been sent to {user.email}. Please check your inbox and spam folder.",
+                "success",
+            )
         else:
-            # When SMTP is not configured in .env, record in log and notify user
-            if not current_app.config.get("MAIL_SERVER") or not current_app.config.get("MAIL_USERNAME"):
-                flash(
-                    f"Password reset request received for {user.email}. (To receive actual emails in your Gmail inbox, add your Gmail App Password to MAIL_USERNAME and MAIL_PASSWORD in .env)",
-                    "info",
-                )
-            else:
-                flash(f"Could not deliver email: {send_msg}", "warning")
-
+            current_app.logger.error(
+                f"Password reset email failed for {user.email}: {send_msg}"
+            )
+            flash(
+                f"Could not send password reset email: {send_msg}",
+                "danger",
+            )
     return render_template(
         "forgot_password.html",
         email=email_entered,
