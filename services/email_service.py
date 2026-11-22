@@ -1,5 +1,5 @@
 import logging
-import yagmail
+import requests
 from typing import Tuple
 from flask import current_app
 
