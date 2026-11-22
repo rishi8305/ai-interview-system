@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class EmailService:
-    """Service to send transactional emails (e.g., password reset) via SMTP."""
+    """Service to send transactional emails (e.g., password reset) via Resend API."""
 
     @classmethod
     def send_password_reset_email(cls, to_email: str, recipient_name: str, reset_url: str) -> Tuple[bool, str]:
@@ -16,19 +16,12 @@ class EmailService:
         Returns: (success: bool, status_message: str)
         """
         config = current_app.config
-        mail_server = config.get("MAIL_SERVER", "").strip()
-        mail_username = config.get("MAIL_USERNAME", "").strip()
-        mail_password = config.get("MAIL_PASSWORD", "").strip()
+        api_key = config.get("RESEND_API_KEY", "").strip()
+        from_email = config.get("RESEND_FROM_EMAIL", "").strip()
 
-        # If SMTP is not configured in .env, log to console and report fallback
-        if not mail_server or not mail_username:
-            logger.info(
-                f"[EMAIL SERVICE - DEMO MODE] Password reset link for {to_email} ({recipient_name}):\n{reset_url}"
-            )
-            return (
-                False,
-                "Live SMTP is not configured in .env. Reset link generated for local testing.",
-            )
+        if not api_key or not from_email:
+            logger.error("Resend API configuration is missing.")
+            return False, "Email service is not configured."
 
         # Build email content
         subject = "AI Interview System - Password Reset Request"
@@ -98,19 +91,29 @@ The AI Interview System Team
 </html>
 """
 
-        try:
-            # Use yagmail for reliable Gmail SMTP delivery
-            yag = yagmail.SMTP(user=mail_username, password=mail_password)
-            yag.send(
-                to=to_email,
-                subject="AI Interview System - Password Reset Request",
-                contents=[html_body, plain_body],
-            )
-            yag.close()
 
-            logger.info(f"Successfully dispatched password reset email to {to_email}")
+        try:
+            response = requests.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "from": from_email,
+                    "to": [to_email],
+                    "subject": subject,
+                    "html": html_body,
+                    "text": plain_body,
+                },
+                timeout=20,
+            )
+
+            response.raise_for_status()
+
+            logger.info(f"Password reset email sent to {to_email}")
             return True, f"Password reset email sent to {to_email}."
 
-        except Exception as e:
-            logger.error(f"Failed to send password reset email via SMTP: {e}", exc_info=True)
-            return False, f"SMTP delivery failed: {str(e)}"
+        except requests.RequestException as e:
+            logger.error(f"Resend email delivery failed: {e}")
+            return False, "Email delivery failed. Please try again."
