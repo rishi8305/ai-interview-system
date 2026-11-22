@@ -228,7 +228,7 @@ def reset_password(token):
             return render_template("reset_password.html", token=token, email=email)
 
         user.set_password(password)
-        db.session.commit()
+        user.save()
 
         flash("Your password has been successfully reset! You can now log in with your new credentials.", "success")
         return redirect(url_for("auth.login"))
